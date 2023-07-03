@@ -13,12 +13,25 @@ public class DBExample {
 	public static Connection conn = null;
 	public static void main(String[] args) {
 		DBExample db = new DBExample();
-		db.connect();
-		db.select();
-//		db.insert();
-//		db.update();
-//		db.delete();
-
+//		try {
+//			//db.connect();
+//			//db.select();
+//			int result = db.insert();
+//			if(result > 0) {   //result 받아야되니까 try catch => record 0개 이상이면-입력되면
+//				System.out.println("자료가 정상적으로 입력");
+//			}else {
+//				System.out.println("자료입력 실패");
+//			}
+			int rs = db.update();
+			if(rs > 0) {
+				System.out.println("회원정보 갱신 성공");
+			}else {
+				System.out.println("회원정보 갱신 실패");
+			}
+			//db.delete();
+//		}catch(Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	public void connect() {
@@ -77,14 +90,71 @@ public class DBExample {
 		}
 	}
 	
-	public void insert() {
+	public int insert() throws Exception {
 		connect();
+		PreparedStatement pstmt = null;  //PreparedStatement 객체 생성
+
 		//번호 생성
+		System.out.print("회원번호: ");
+		String tid = sc.nextLine();
 		
 		System.out.print("이름: ");
-		String tnm = sc.next();
+		String tnm = sc.nextLine();
 		
-		System.out.print("이름: ");
-		String tnm1 = sc.next();
+		System.out.print("전화번호(핸드폰): ");
+		String thp = sc.nextLine();
+		
+		String sql = "insert into tb1_member(mem_id, mem_name, mem_hp, mem_mileage) ";
+		sql = sql + " values(?, ?, ?, 0)";  //회원번호, 이름, 전화번호, 마일리지(아직 구매활동 안했으니까 0 세팅)
+		
+		//? 있는 상태로 먼저
+		pstmt = conn.prepareStatement(sql);		//동적쿼리 
+
+		//맵핑
+		pstmt.setString(1, tid);
+		pstmt.setString(2, tnm);
+		pstmt.setString(3, thp);  //sql문 완성
+		
+		//실행
+		int rs = pstmt.executeUpdate();
+		//executeUpdate<=insert update delete
+		//명령 실행되면 입력된 행의 수 반환 => 정수 //select 일때만 => result set
+		return rs;
+	}
+	
+	public int update() {
+		PreparedStatement pstmt = null;
+		int result = 0;
+		
+		System.out.println("갱신할 회원번호: ");
+		String tid = sc.nextLine();
+		
+		System.out.println("전화번호: ");
+		String thp = sc.nextLine();
+		
+		System.out.println("마일리지: ");
+		int tmile = sc.nextInt();
+		
+		try {
+			// 갱신할 회원번호 입력 받기
+			StringBuffer sql = new StringBuffer("update tb1_member \n") ;
+			sql.append("      set mem_hp = ? \n");
+			sql.append("        , mem_mileage = ? \n");
+			sql.append("   where mem_id = ? ");
+			
+			//문자열 객체로 만듦
+			String sqlStr = sql.toString();
+			pstmt = conn.prepareStatement(sqlStr);	
+	
+			pstmt.setString(1, thp);
+			pstmt.setInt(2, tmile);
+			pstmt.setString(3, tid);
+			
+			result = pstmt.executeUpdate();
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 }
