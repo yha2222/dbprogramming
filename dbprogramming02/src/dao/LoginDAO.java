@@ -27,4 +27,13 @@ public class LoginDAO {
 		param.add(pw);
 		return jdbc.selectOne(sql, param); 
 	}
+	
+	public Map<String, Object> select(String mid){
+		String sql = "SELECT * FROM TBL_MEMBER ";
+		sql = sql + " WHERE MID = ? ";
+		List<Object> param = new ArrayList<Object>();
+		param.add(mid);
+		
+		return jdbc.selectOne(sql, param);
+	}
 }
